@@ -30,7 +30,7 @@ RUN set -x \
   && python${PY} -m venv /ocamt \
   && /ocamt/bin/pip install --no-cache-dir -U pip wheel
 RUN set -x \
-  && /ocamt/bin/pip install --no-cache-dir -e git+https://github.com/cetmix/cetmix-maintainer-tools@ea2a2c00296161c9482a0c42d0c841271ce83e70#egg=oca-maintainers-tools \
+  && /ocamt/bin/pip install --no-cache-dir -e git+https://github.com/cetmix/cetmix-maintainer-tools@7f6de8cf26662e506ffe2c532ad385e5979d0f3c#egg=oca-maintainers-tools \
   && ln -s /ocamt/bin/oca-gen-addons-table /usr/local/bin/ \
   && ln -s /ocamt/bin/oca-gen-addon-readme /usr/local/bin/ \
   && ln -s /ocamt/bin/oca-gen-addon-icon /usr/local/bin/ \
