@@ -9,6 +9,7 @@ from ..config import (
     GEN_ADDONS_TABLE_EXTRA_ARGS,
     GEN_PYPROJECT_MIN_VERSION,
     dist_publisher,
+    should_export_repo,
     switchable,
 )
 from ..github import git_commit_if_needed, git_push_if_needed, temporary_clone
@@ -139,12 +140,18 @@ def main_branch_bot(org, repo, branch, build_wheels, dry_run=False):
             _logger.info(f"git push in {org}/{repo}@{branch}")
             git_push_if_needed("origin", branch, cwd=clone_dir)
         if build_wheels:
-            build_and_publish_wheels(clone_dir, dist_publisher, dry_run)
-            build_and_publish_metapackage_wheel(
-                clone_dir,
-                dist_publisher,
-                dry_run,
-            )
+            if should_export_repo(org, repo):
+                build_and_publish_wheels(clone_dir, dist_publisher, dry_run)
+                build_and_publish_metapackage_wheel(
+                    clone_dir,
+                    dist_publisher,
+                    dry_run,
+                )
+            else:
+                _logger.info(
+                    f"Repository {org}/{repo} excluded from wheel export "
+                    f"based on configuration"
+                )
 
 
 @task()

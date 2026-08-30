@@ -2,6 +2,11 @@
 OCA GitHub bot
 ##############
 
+**Cetmix fork** of https://github.com/OCA/oca-github-bot
+(``cetmix/oca-github-bot``). See ``docs/CETMIX_CUSTOMIZATIONS.md`` for
+Cetmix-only changes and how to sync from OCA without writing to upstream.
+Companion tools: https://github.com/cetmix/cetmix-maintainer-tools.
+
 .. image:: https://results.pre-commit.ci/badge/github/OCA/oca-github-bot/master.svg
    :target: https://results.pre-commit.ci/latest/github/OCA/oca-github-bot/master
    :alt: pre-commit.ci status

@@ -153,3 +153,50 @@ MAIN_BRANCH_BOT_MIN_VERSION = os.environ.get("MAIN_BRANCH_BOT_MIN_VERSION", "11.
 # branches. For previous versions, the setuptools_odoo task is run and generates
 # setup.py instead of pyproject.toml.
 GEN_PYPROJECT_MIN_VERSION = os.environ.get("GEN_PYPROJECT_MIN_VERSION", "17.0")
+
+# Comma separated list of repositories allowed to export wheels (format: org/repo).
+# If set, only repositories in this list will be exported.
+# If empty, all repositories (except those in OCABOT_EXPORT_REPOS_DENY) are exported.
+OCABOT_EXPORT_REPOS_ALLOW = (
+    os.environ.get("OCABOT_EXPORT_REPOS_ALLOW", "")
+    and [repo.strip() for repo in os.environ.get("OCABOT_EXPORT_REPOS_ALLOW").split(",")]
+    or []
+)
+
+# Comma separated list of repositories denied from exporting wheels (format: org/repo).
+# Repositories in this list will never be exported, even if in OCABOT_EXPORT_REPOS_ALLOW.
+# This takes precedence over OCABOT_EXPORT_REPOS_ALLOW.
+OCABOT_EXPORT_REPOS_DENY = (
+    os.environ.get("OCABOT_EXPORT_REPOS_DENY", "")
+    and [repo.strip() for repo in os.environ.get("OCABOT_EXPORT_REPOS_DENY").split(",")]
+    or []
+)
+
+
+def should_export_repo(org: str, repo: str) -> bool:
+    """
+    Check if a repository should export wheels to PyPI/simple index.
+
+    Args:
+        org: Organization name
+        repo: Repository name
+
+    Returns:
+        True if the repository should be exported, False otherwise
+    """
+    repo_name = f"{org}/{repo}"
+    # Deny list takes precedence
+    if OCABOT_EXPORT_REPOS_DENY:
+        if repo_name in OCABOT_EXPORT_REPOS_DENY:
+            _logger.debug(
+                "Repository %s/%s excluded from export (in deny list)", org, repo
+            )
+            return False
+    # Allow list: if set, only repos in the list are exported
+    if OCABOT_EXPORT_REPOS_ALLOW:
+        if repo_name not in OCABOT_EXPORT_REPOS_ALLOW:
+            _logger.debug(
+                "Repository %s/%s excluded from export (not in allow list)", org, repo
+            )
+            return False
+    return True

@@ -12,6 +12,7 @@ from ..config import (
     GITHUB_STATUS_IGNORED,
     MERGE_BOT_INTRO_MESSAGES,
     dist_publisher,
+    should_export_repo,
     switchable,
 )
 from ..manifest import (
@@ -181,8 +182,14 @@ def _merge_bot_merge_pr(org, repo, merge_bot_branch, cwd, dry_run=False):
     # if PyPI rejects the upload for any reason. There is a possibility
     # that the upload succeeds and then the merge fails, but that should be
     # exceptional, and it is better than the contrary.
-    for addon_dir in modified_installable_addon_dirs:
-        build_and_publish_wheel(addon_dir, dist_publisher, dry_run)
+    if should_export_repo(org, repo):
+        for addon_dir in modified_installable_addon_dirs:
+            build_and_publish_wheel(addon_dir, dist_publisher, dry_run)
+    else:
+        _logger.info(
+            f"Repository {org}/{repo} excluded from wheel export "
+            f"based on configuration, skipping publication before merge"
+        )
 
     if dry_run:
         _logger.info(f"DRY-RUN git push in {org}/{repo}@{target_branch}")

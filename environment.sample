@@ -67,6 +67,18 @@ SIMPLE_INDEX_ROOT=/app/run/simple-index
 # - password for twine --password option
 OCABOT_TWINE_REPOSITORIES="[('https://pypi.org/simple','https://upload.pypi.org/legacy/','pypiuser','pypipassword')]"
 
+# Comma separated list of repositories allowed to export wheels (format: org/repo).
+# If set, only repositories in this list will be exported.
+# If empty, all repositories (except those in OCABOT_EXPORT_REPOS_DENY) are exported.
+# Example: OCABOT_EXPORT_REPOS_ALLOW=OCA/account-financial-tools,OCA/website
+#OCABOT_EXPORT_REPOS_ALLOW=
+
+# Comma separated list of repositories denied from exporting wheels (format: org/repo).
+# Repositories in this list will never be exported, even if in OCABOT_EXPORT_REPOS_ALLOW.
+# This takes precedence over OCABOT_EXPORT_REPOS_ALLOW.
+# Example: OCABOT_EXPORT_REPOS_DENY=OCA/internal-tools,OCA/private-repo
+#OCABOT_EXPORT_REPOS_DENY=
+
 # Space separated list of extra arguments, for the calls of the
 # following command
 # * oca-gen-addons-table
