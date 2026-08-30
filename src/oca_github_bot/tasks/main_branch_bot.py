@@ -12,7 +12,6 @@ from ..config import (
     switchable,
 )
 from ..github import git_commit_if_needed, git_push_if_needed, temporary_clone
-from ..manifest import get_odoo_series_from_branch
 from ..process import check_call
 from ..queue import getLogger, task
 from ..version_branch import is_main_branch_bot_branch, is_supported_main_branch
@@ -77,7 +76,7 @@ def _setuptools_odoo_make_default(org, repo, branch, cwd):
 @switchable("whool_init")
 def _whool_init(org, repo, branch, cwd):
     _logger.info(
-        "generate pyproejct.toml with whool init in %s/%s@%s\n", org, repo, branch
+        "generate pyproject.toml with whool init in %s/%s@%s\n", org, repo, branch
     )
     whool_init_cmd = ["whool", "init"]
     check_call(whool_init_cmd, cwd=cwd)
@@ -144,7 +143,6 @@ def main_branch_bot(org, repo, branch, build_wheels, dry_run=False):
             build_and_publish_metapackage_wheel(
                 clone_dir,
                 dist_publisher,
-                get_odoo_series_from_branch(branch),
                 dry_run,
             )
 
