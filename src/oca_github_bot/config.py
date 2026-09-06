@@ -83,9 +83,11 @@ GEN_ADDON_ICON_EXTRA_ARGS = (
     or []
 )
 
+# Cetmix: also ignore runboat/build — merge bot must not wait on Runboat;
+# GitHub Actions on *-ocabot-* branches are the merge gate instead.
 GITHUB_STATUS_IGNORED = os.environ.get(
     "GITHUB_STATUS_IGNORED",
-    "ci/runbot,codecov/project,codecov/patch,coverage/coveralls",
+    "ci/runbot,runboat/build,codecov/project,codecov/patch,coverage/coveralls",
 ).split(",")
 
 GITHUB_CHECK_SUITES_IGNORED = os.environ.get(

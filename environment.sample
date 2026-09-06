@@ -50,8 +50,10 @@ ODOO_PASSWORD=
 # Coma separated list of task to ignore
 #BOT_TASKS_DISABLED=
 
-# Coma separated list of github status to ignore
-#GITHUB_STATUS_IGNORED=ci/runbot,codecov/project,codecov/patch,coverage/coveralls
+# Coma separated list of github status to ignore.
+# Cetmix default also ignores runboat/build so /ocabot merge does not wait on
+# Runboat; repos must run CI on push to *-ocabot-* (see OCA workflow pattern).
+#GITHUB_STATUS_IGNORED=ci/runbot,runboat/build,codecov/project,codecov/patch,coverage/coveralls
 
 # Coma separated list of github Check suites to ignore
 #GITHUB_CHECK_SUITES_IGNORED=Codecov

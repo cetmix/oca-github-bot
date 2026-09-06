@@ -70,6 +70,36 @@ Deny list wins over allow list. Empty allow list means “all repos except deny�
 
 When merging OCA, preserve OCA’s current `build_and_publish_metapackage_wheel(...)` signature (no separate series argument as of OCA `eb48c96`).
 
+## 6. Ignore Runboat commit status on merge
+
+**Why:** Cetmix Runboat posts `runboat/build` on merge-bot branches. The merge
+bot treated that as a required green check, so PRs stayed in
+`bot is merging ⏳` when Runboat never built the repo, and merges that did
+finish were gated on Runboat rather than GitHub Actions.
+
+**Files:**
+
+| File | Required end state |
+|------|--------------------|
+| `src/oca_github_bot/config.py` | Default `GITHUB_STATUS_IGNORED` includes `runboat/build` |
+| `environment.sample` | Documented default includes `runboat/build` |
+
+OCA default stays `ci/runbot,codecov/...` only — keep `runboat/build` when
+merging upstream into this fork.
+
+**Repo requirement (not in this bot):** addon workflows must run on push to
+`{series}-ocabot-*` (OCA pattern), e.g.:
+
+```yaml
+push:
+  branches:
+    - "18.0"
+    - "18.0-ocabot-*"
+```
+
+Without that, ignoring Runboat leaves no success signal and the merge bot
+still waits forever.
+
 ## Not customizations
 
 | Observation | Action on sync |
@@ -105,6 +135,7 @@ git diff OCA/master HEAD --stat
 
 grep GITHUB_REPO_PRIVATE src/oca_github_bot/config.py environment.sample
 grep -A2 'GITHUB_REPO_PRIVATE' src/oca_github_bot/github.py
+grep runboat/build src/oca_github_bot/config.py environment.sample
 grep cetmix-maintainer-tools Dockerfile
 ! grep 'github.com/OCA/maintainer-tools@' Dockerfile
 ```
