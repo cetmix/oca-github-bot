@@ -72,10 +72,9 @@ When merging OCA, preserve OCA’s current `build_and_publish_metapackage_wheel(
 
 ## 6. Ignore Runboat commit status on merge
 
-**Why:** Cetmix Runboat posts `runboat/build` on merge-bot branches. The merge
-bot treated that as a required green check, so PRs stayed in
-`bot is merging ⏳` when Runboat never built the repo, and merges that did
-finish were gated on Runboat rather than GitHub Actions.
+**Why:** Cetmix Runboat posts `runboat/build` on merge-bot branches. Kept in
+the ignore list so any leftover status-webhook path does not treat Runboat as
+required.
 
 **Files:**
 
@@ -87,18 +86,22 @@ finish were gated on Runboat rather than GitHub Actions.
 OCA default stays `ci/runbot,codecov/...` only — keep `runboat/build` when
 merging upstream into this fork.
 
-**Repo requirement (not in this bot):** addon workflows must run on push to
-`{series}-ocabot-*` (OCA pattern), e.g.:
+## 7. Merge without waiting for CI
 
-```yaml
-push:
-  branches:
-    - "18.0"
-    - "18.0-ocabot-*"
-```
+**Why:** OCA waits for green checks on the temporary `*-ocabot-merge-pr-*`
+branch. Cetmix private/addon repos often never complete any check there
+(missing `{series}-ocabot-*` workflow triggers, `norunboat`, queued empty
+CodeRabbit/Cursor suites), so PRs stayed on `bot is merging ⏳` forever.
 
-Without that, ignoring Runboat leaves no success signal and the merge bot
-still waits forever.
+**File:** `src/oca_github_bot/tasks/merge_bot.py` — `merge_bot_start`
+
+After preparing and pushing the merge-bot branch, call `_merge_bot_merge_pr`
+immediately. Do not wait for `status` / `check_suite` webhooks.
+`merge_bot_status` remains for compatibility with delayed webhooks but is no
+longer required for a successful `/ocabot merge`.
+
+On OCA sync: keep this immediate-finalize behavior; do not restore
+“awaiting test results” as the only path.
 
 ## Not customizations
 

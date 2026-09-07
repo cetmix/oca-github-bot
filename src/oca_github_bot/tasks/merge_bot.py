@@ -263,6 +263,9 @@ def merge_bot_start(
             pr, target_branch, username, bumpversion_mode
         )
         pr_branch = f"tmp-pr-{pr}"
+        # True once we commented/labelled for finalize — avoid a second
+        # "could not start" comment if finalize fails and re-raises.
+        merge_finalizing = False
         try:
             with github.temporary_clone(org, repo, target_branch) as clone_dir:
                 # create merge bot branch from PR and rebase it on target branch
@@ -297,8 +300,11 @@ def merge_bot_start(
                     merge_strategy,
                     cwd=clone_dir,
                 )
-                # push and let tests run again; delete on origin
-                # to be sure GitHub sees it as a new branch and relaunches all checks
+                # Push the merge-bot branch (useful for audit / retry), then
+                # finalize immediately.
+                # Cetmix: do not wait for CI on *-ocabot-* — private/addon repos
+                # often have no check that ever completes on that branch, so the
+                # bot would stay on "bot is merging" forever.
                 _git_delete_branch("origin", merge_bot_branch, cwd=clone_dir)
                 check_call(["git", "push", "origin", merge_bot_branch], cwd=clone_dir)
                 if not intro_message:
@@ -307,10 +313,43 @@ def merge_bot_start(
                     gh_pr.create_comment,
                     f"{intro_message}\n"
                     f"Prepared branch [{merge_bot_branch}]"
-                    f"(https://github.com/{org}/{repo}/commits/{merge_bot_branch}), "
-                    f"awaiting test results.",
+                    f"(https://github.com/{org}/{repo}/commits/{merge_bot_branch}). "
+                    f"Merging without waiting for CI checks.",
                 )
+                gh_issue = github.gh_call(gh_pr.issue)
+                _logger.info(f"add {LABEL_MERGING} label to PR {gh_pr.url}")
+                github.gh_call(gh_issue.add_labels, LABEL_MERGING)
+                merge_finalizing = True
+                try:
+                    _merge_bot_merge_pr(
+                        org, repo, merge_bot_branch, clone_dir, dry_run=dry_run
+                    )
+                except CalledProcessError as e:
+                    cmd = cmd_to_str(e.cmd)
+                    github.gh_call(
+                        gh_pr.create_comment,
+                        hide_secrets(
+                            f"@{username} The merge process could not be "
+                            f"finalized, because "
+                            f"command `{cmd}` failed with output:\n```\n"
+                            f"{e.output}\n```"
+                        ),
+                    )
+                    _remove_merging_label(github, gh_pr, dry_run=dry_run)
+                    raise
+                except Exception as e:
+                    github.gh_call(
+                        gh_pr.create_comment,
+                        hide_secrets(
+                            f"@{username} The merge process could not be "
+                            f"finalized because an exception was raised: {e}."
+                        ),
+                    )
+                    _remove_merging_label(github, gh_pr, dry_run=dry_run)
+                    raise
         except CalledProcessError as e:
+            if merge_finalizing:
+                raise
             cmd = cmd_to_str(e.cmd)
             github.gh_call(
                 gh_pr.create_comment,
@@ -321,6 +360,8 @@ def merge_bot_start(
             )
             raise
         except Exception as e:
+            if merge_finalizing:
+                raise
             github.gh_call(
                 gh_pr.create_comment,
                 hide_secrets(
@@ -329,10 +370,6 @@ def merge_bot_start(
                 ),
             )
             raise
-        else:
-            gh_issue = github.gh_call(gh_pr.issue)
-            _logger.info(f"add {LABEL_MERGING} label to PR {gh_pr.url}")
-            github.gh_call(gh_issue.add_labels, LABEL_MERGING)
 
 
 def _get_commit_success(org, repo, pr, gh_commit):
