@@ -1,11 +1,11 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 LABEL maintainer="Odoo Community Association (OCA)"
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
-ARG PY=3.12
+ARG PY=3.14
 
 # binutils is needed for the ar command, used by pypandoc.ensure_pandoc_installed()
 RUN set -x \
@@ -30,7 +30,7 @@ RUN set -x \
   && python${PY} -m venv /ocamt \
   && /ocamt/bin/pip install --no-cache-dir -U pip wheel
 RUN set -x \
-  && /ocamt/bin/pip install --no-cache-dir -e git+https://github.com/cetmix/cetmix-maintainer-tools@d9fd54890e4bbdcda5e93d05cd0d33b17010bfab#egg=oca-maintainers-tools \
+  && /ocamt/bin/pip install --no-cache-dir -e git+https://github.com/cetmix/cetmix-maintainer-tools@278405c273210bb6d6a20edfe67604c86a52ea36#egg=oca-maintainers-tools \
   && ln -s /ocamt/bin/oca-gen-addons-table /usr/local/bin/ \
   && ln -s /ocamt/bin/oca-gen-addon-readme /usr/local/bin/ \
   && ln -s /ocamt/bin/oca-gen-addon-icon /usr/local/bin/ \

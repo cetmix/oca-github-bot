@@ -40,7 +40,7 @@ Do not drop OCA improvements in the same files (e.g. `raise Retry(...) from e`).
 Current pin (refresh when syncing maintainer-tools):
 
 ```text
-git+https://github.com/cetmix/cetmix-maintainer-tools@d9fd54890e4bbdcda5e93d05cd0d33b17010bfab#egg=oca-maintainers-tools
+git+https://github.com/cetmix/cetmix-maintainer-tools@278405c273210bb6d6a20edfe67604c86a52ea36#egg=oca-maintainers-tools
 ```
 
 After updating the pin, confirm the SHA exists on `cetmix/cetmix-maintainer-tools` and that Cetmix customizations there are intact (see that repo’s `docs/CETMIX_CUSTOMIZATIONS.md`).
@@ -49,7 +49,7 @@ After updating the pin, confirm the SHA exists on `cetmix/cetmix-maintainer-tool
 
 **File:** `environment.sample`
 
-`MAINTAINER_CHECK_ODOO_RELEASES` includes series Cetmix still maintains (currently through `19.0`). Take new series from OCA when they add them; keep any newer Cetmix-only series that deployment still uses.
+`MAINTAINER_CHECK_ODOO_RELEASES` includes series Cetmix still maintains (currently through `20.0`). Take new series from OCA when they add them; keep any newer Cetmix-only series that deployment still uses.
 
 ## 4. README fork pointer
 
